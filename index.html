@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Riego inteligente</title>
+<meta name="theme-color" content="#1c1712">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <div>
+      <h1>Riego inteligente</h1>
+      <p class="subtitle">Control por micro:bit &middot; Bluetooth</p>
+    </div>
+  </div>
+  <button id="connectBtn" class="connect-btn">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="connectLabel">Conectar</span>
+  </button>
+</header>
+
+<main>
+
+  <p id="unsupportedMsg" class="banner hidden">
+    Este navegador no soporta Web Bluetooth. Abrí esta página en Chrome o Edge, en PC o en Android.
+  </p>
+
+  <section class="cards">
+    <article class="card">
+      <div class="card-head">
+        <i class="ti ti-temperature" aria-hidden="true"></i>
+        <span>Temperatura ambiente</span>
+      </div>
+      <div class="card-value"><span id="tempVal">--</span><span class="unit">&deg;C</span></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <i class="ti ti-droplet" aria-hidden="true"></i>
+        <span>Humedad ambiente</span>
+      </div>
+      <div class="card-value"><span id="humVal">--</span><span class="unit">%</span></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <i class="ti ti-bolt" aria-hidden="true"></i>
+        <span>Conductividad el&eacute;ctrica</span>
+      </div>
+      <div class="card-value"><span id="ecVal">--</span><span class="unit">%</span></div>
+    </article>
+
+    <article class="card soil-card">
+      <div class="card-head">
+        <i class="ti ti-plant-2" aria-hidden="true"></i>
+        <span>Humedad del suelo</span>
+      </div>
+      <div class="soil-row">
+        <div class="soil-gauge" aria-hidden="true">
+          <div class="soil-fill" id="soilFill"></div>
+          <div class="soil-threshold" id="soilThresholdMark"></div>
+        </div>
+        <div class="soil-readout">
+          <div class="card-value"><span id="soilVal">--</span><span class="unit">%</span></div>
+          <div class="threshold-editor">
+            <label for="thresholdInput" class="hint">Umbral de riego autom&aacute;tico</label>
+            <div class="threshold-row">
+              <input type="number" id="thresholdInput" min="0" max="100" step="1" placeholder="--">
+              <span class="unit">%</span>
+              <button id="thresholdSaveBtn" class="threshold-save-btn">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="control-panel">
+    <div class="control-row">
+      <div class="control-label">
+        <strong>Modo</strong>
+        <p class="hint">Autom&aacute;tico riega solo cuando el suelo lo necesita</p>
+      </div>
+      <div class="mode-switch" id="modeSwitch">
+        <button class="mode-btn active" id="manualBtn" data-mode="manual">Manual</button>
+        <button class="mode-btn" id="autoBtn" data-mode="auto">Autom&aacute;tico</button>
+      </div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-label">
+        <strong>Motobomba</strong>
+        <p class="hint" id="pumpHint">Desconectado</p>
+      </div>
+      <button class="pump-btn" id="pumpBtn" disabled>
+        <i class="ti ti-power" aria-hidden="true"></i>
+        <span id="pumpBtnLabel">Encender</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="last-update" id="lastUpdate"></p>
+
+</main>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<script src="app.js"></script>
+</body>
+</html>
