@@ -9,6 +9,7 @@ const ui = {
   connectBtn: el('connectBtn'),
   connectLabel: el('connectLabel'),
   statusDot: el('statusDot'),
+  subtitle: el('subtitle'),
   unsupportedMsg: el('unsupportedMsg'),
   tempVal: el('tempVal'),
   humVal: el('humVal'),
@@ -35,7 +36,19 @@ let isAutoMode = false;
 function setConnectionUI(state) {
   // state: 'disconnected' | 'connecting' | 'connected'
   ui.statusDot.className = 'status-dot' + (state === 'connected' ? ' connected' : state === 'connecting' ? ' connecting' : '');
-  ui.connectLabel.textContent = state === 'connected' ? 'Desconectar' : state === 'connecting' ? 'Conectando...' : 'Conectar';
+  ui.connectBtn.classList.toggle('connected', state === 'connected');
+
+  if (state === 'connected') {
+    ui.connectLabel.textContent = 'Conectado';
+    ui.subtitle.textContent = `Conectado a ${(device && device.name) || 'micro:bit'}`;
+  } else if (state === 'connecting') {
+    ui.connectLabel.textContent = 'Conectando...';
+    ui.subtitle.textContent = 'Control por micro:bit \u00b7 Bluetooth';
+  } else {
+    ui.connectLabel.textContent = 'Conectar';
+    ui.subtitle.textContent = 'Control por micro:bit \u00b7 Bluetooth';
+  }
+
   ui.pumpBtn.disabled = state !== 'connected' || isAutoMode;
   ui.manualBtn.disabled = state !== 'connected';
   ui.autoBtn.disabled = state !== 'connected';
@@ -44,6 +57,23 @@ function setConnectionUI(state) {
     ui.pumpHint.textContent = 'Desconectado';
   }
 }
+
+// Mientras esta conectado, mostrar "Desconectar" solo al pasar el mouse o enfocar el boton,
+// para dejar claro que hacer click desconecta, sin perder la confirmacion visual de "Conectado"
+function showDisconnectHint() {
+  if (ui.connectBtn.classList.contains('connected')) {
+    ui.connectLabel.textContent = 'Desconectar';
+  }
+}
+function showConnectedLabel() {
+  if (ui.connectBtn.classList.contains('connected')) {
+    ui.connectLabel.textContent = 'Conectado';
+  }
+}
+ui.connectBtn.addEventListener('mouseenter', showDisconnectHint);
+ui.connectBtn.addEventListener('mouseleave', showConnectedLabel);
+ui.connectBtn.addEventListener('focus', showDisconnectHint);
+ui.connectBtn.addEventListener('blur', showConnectedLabel);
 
 async function connect() {
   if (!navigator.bluetooth) {
