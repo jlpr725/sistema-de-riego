@@ -65,7 +65,7 @@ html, body {
   cursor: pointer;
 }
 .connect-btn:focus-visible { outline: 2px solid var(--water-light); outline-offset: 2px; }
-.connect-btn:hover { border-color: var(--border, #3a3126); background: var(--surface-2); }
+.connect-btn:hover { border-color: var(--border, #3a3126); background: var(--surface-2); color: var(--text); }
 
 .connect-btn.connected {
   background: rgba(127,166,80,0.16);
