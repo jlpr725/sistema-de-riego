@@ -1,5 +1,17 @@
 # Riego inteligente — PWA para micro:bit
 
+## Novedades de esta versión
+
+- **Nuevo diseño visual**, alineado a los mockups aprobados: cards con chips de ícono a color, banner de conexión que se pone verde sólido al conectar, y una card de "Acciones rápidas" con un switch para elegir Automático/Manual y un botón de encendido real para la bomba en modo Manual.
+- **Historial de 24 horas**: se abre con el botón del reloj (arriba a la derecha). Guarda temperatura, humedad ambiente, humedad de suelo, conductividad, estado de la bomba y modo, con gráficas de línea de las 3 primeras y una tabla debajo. Se guarda en el propio dispositivo (`localStorage`), no en un servidor.
+- **Exportar CSV y Excel (.xlsx)** desde la pantalla de historial. El CSV funciona 100% offline siempre. El Excel usa una librería (SheetJS) que se descarga la primera vez que se usa esa función con conexión a internet; después queda cacheada por el service worker y funciona offline también.
+- **Corregidos bugs de contraste**: el input de umbral y su símbolo "%" eran invisibles (texto del mismo color que el fondo). Ya se ven bien.
+- **Corregidas las rutas de los íconos**: apuntaban a una carpeta `icons/` que no existía; ahora apuntan directo a `icon-192.png` e `icon-512.png`, como están los archivos.
+
+### Cómo funciona el switch de modo
+
+El interruptor de la card "Acciones rápidas" alterna entre **Automático** (apagado, la microbit riega sola según el umbral) y **Manual** (encendido). Al pasar a Manual, el cuadrado con el ícono de encendido a la izquierda se activa como botón real: tocarlo prende o apaga la bomba (comandos `bon`/`boff`). En Automático ese botón queda inerte (gris), porque la decisión la toma la microbit sola.
+
 ## Cómo probarla
 1. Subí esta carpeta completa a un hosting con HTTPS (GitHub Pages, Netlify, Vercel). Web Bluetooth exige HTTPS (o `localhost`) para funcionar.
 2. Abrí el sitio en **Chrome o Edge**, en PC o en Android (iOS no soporta Web Bluetooth).
