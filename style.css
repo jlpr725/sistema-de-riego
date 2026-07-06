@@ -66,7 +66,6 @@ html, body {
 }
 .connect-btn:focus-visible { outline: 2px solid var(--water-light); outline-offset: 2px; }
 .connect-btn:hover { border-color: var(--border, #3a3126); background: var(--surface-2); color: #ffffff; }
-.status-dot:hover {background: #ffffff;}
 
 .connect-btn.connected {
   background: rgba(127,166,80,0.16);
@@ -86,6 +85,7 @@ html, body {
   background: #006d44;
   flex-shrink: 0;
 }
+
 .status-dot.connected { background: var(--leaf); box-shadow: 0 0 0 3px rgba(127,166,80,0.2); }
 .status-dot.connecting { background: var(--clay); }
 
@@ -162,7 +162,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px; }
   position: absolute;
   left: -2px; right: -2px;
   height: 2px;
-  background: var(--clay);
+  background: #76cf79;
   bottom: 0%;
 }
 
@@ -183,13 +183,13 @@ main { max-width: 760px; margin: 0 auto; padding: 20px; }
   padding: 6px 8px;
 }
 .threshold-row input[type="number"]:focus-visible { outline: 2px solid var(--water-light); outline-offset: 1px; }
-.threshold-row .unit { font-size: 12px; color: var(--text-soft); }
+.threshold-row .unit { font-size: 12px; color: #ffffff; }
 
 .threshold-save-btn {
   margin-left: auto;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  color: var(--text);
+  color: #ffffff;
   font-family: var(--font-head);
   font-size: 12px;
   font-weight: 500;
@@ -222,7 +222,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px; }
 
 .mode-switch {
   display: flex;
-  background: var(--surface-2);
+  background: #76cf79;
   border-radius: 999px;
   padding: 3px;
   border: 1px solid var(--border);
@@ -239,7 +239,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px; }
   border-radius: 999px;
   cursor: pointer;
 }
-.mode-btn.active { background: var(--water); color: #042c53; }
+.mode-btn.active { background: var(--surface-2); color: #ffffff; }
 .mode-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .pump-btn {
@@ -248,7 +248,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px; }
   gap: 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  color: var(--text-soft);
+  color: #ffffff;
   font-family: var(--font-head);
   font-weight: 500;
   font-size: 13px;
