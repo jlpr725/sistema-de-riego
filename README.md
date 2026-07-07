@@ -3,10 +3,14 @@
 ## Novedades de esta versión
 
 - **Nuevo diseño visual**, alineado a los mockups aprobados: cards con chips de ícono a color, banner de conexión que se pone verde sólido al conectar, y una card de "Acciones rápidas" con un switch para elegir Automático/Manual y un botón de encendido real para la bomba en modo Manual.
+- **Iconografía con Font Awesome Free** (versión 7.0.1, vía cdnjs), en reemplazo de Tabler Icons.
 - **Historial de 24 horas**: se abre con el botón del reloj (arriba a la derecha). Guarda temperatura, humedad ambiente, humedad de suelo, conductividad, estado de la bomba y modo, con gráficas de línea de las 3 primeras y una tabla debajo. Se guarda en el propio dispositivo (`localStorage`), no en un servidor.
 - **Exportar CSV y Excel (.xlsx)** desde la pantalla de historial. El CSV funciona 100% offline siempre. El Excel usa una librería (SheetJS) que se descarga la primera vez que se usa esa función con conexión a internet; después queda cacheada por el service worker y funciona offline también.
-- **Corregidos bugs de contraste**: el input de umbral y su símbolo "%" eran invisibles (texto del mismo color que el fondo). Ya se ven bien.
-- **Corregidas las rutas de los íconos**: apuntaban a una carpeta `icons/` que no existía; ahora apuntan directo a `icon-192.png` e `icon-512.png`, como están los archivos.
+- **Se quitó el editor de umbral** de la card de Humedad de Suelo: el umbral de riego automático ahora se define de forma fija en el código de la microbit, así que la app ya no lo muestra ni lo permite editar. El comando `thrNNN` sigue documentado más abajo por si en el futuro se quiere reactivar, pero la app ya no lo envía.
+- **Corregidos bugs de contraste**: el input de umbral y su símbolo "%" eran invisibles (texto del mismo color que el fondo). Ya no aplica porque ese control se quitó, pero quedó resuelto para cualquier otro campo similar.
+- **Corregidas las rutas de los íconos** de la app (favicon/PWA): apuntaban a una carpeta `icons/` que no existía; ahora apuntan directo a `icon-192.png` e `icon-512.png`, como están los archivos.
+- **Corregido el banner de conexión que no cambiaba de estado**: la causa más probable era el service worker sirviendo una versión vieja cacheada del sitio. Ahora el service worker usa "red primero" para los archivos propios (html/css/js), así que cualquier actualización que subas al hosting se ve de inmediato, y solo sigue cacheando de forma preferente los recursos externos (fuentes, Font Awesome, SheetJS). Si ya habías abierto la app antes con la versión vieja, hacé un refresh forzado una vez (Ctrl+Shift+R o borrando datos del sitio) para que el navegador tome el nuevo service worker.
+- Ahora, si falla la conexión Bluetooth, aparece un mensaje explicando el motivo en vez de simplemente volver a "Conectar" sin explicación.
 
 ### Cómo funciona el switch de modo
 
