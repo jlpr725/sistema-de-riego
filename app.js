@@ -16,12 +16,11 @@ const ui = {
   connectSubtitle: el('connectSubtitle'),
   subtitle: el('subtitle'),
   unsupportedMsg: el('unsupportedMsg'),
+  connectionError: el('connectionError'),
   tempVal: el('tempVal'),
   humVal: el('humVal'),
   ecVal: el('ecVal'),
   soilVal: el('soilVal'),
-  thresholdInput: el('thresholdInput'),
-  thresholdSaveBtn: el('thresholdSaveBtn'),
   quickActionTitle: el('quickActionTitle'),
   quickActionSubtitle: el('quickActionSubtitle'),
   modeToggle: el('modeToggle'),
@@ -129,9 +128,11 @@ function setConnectionUI(state) {
     ui.subtitle.textContent = 'Control por micro:bit \u00b7 Bluetooth';
   }
 
-  ui.thresholdInput.disabled = state !== 'connected';
-  ui.thresholdSaveBtn.disabled = state !== 'connected';
   ui.modeToggle.disabled = state !== 'connected';
+
+  if (state !== 'disconnected') {
+    ui.connectionError.classList.add('hidden');
+  }
 
   if (state !== 'connected') {
     ui.pumpBtn.disabled = true;
@@ -184,6 +185,12 @@ async function connect() {
   } catch (err) {
     console.error('Error de conexion:', err);
     setConnectionUI('disconnected');
+    // "NotFoundError" pasa cuando el usuario cierra el selector de dispositivos sin elegir uno;
+    // en ese caso no mostramos error, fue una cancelación normal.
+    if (err && err.name !== 'NotFoundError') {
+      ui.connectionError.textContent = `No se pudo conectar: ${err.message || err.name || 'error desconocido'}. Revisá que el Bluetooth esté activo y que la microbit tenga el programa BLE UART cargado, y volvé a intentar.`;
+      ui.connectionError.classList.remove('hidden');
+    }
   }
 }
 
@@ -222,17 +229,13 @@ function handleLine(line) {
   const parts = line.split(',').map((p) => p.trim());
   if (parts.length < 6) return;
 
-  const [temp, hum, soil, ec, pump, mode, threshold] = parts.map(Number);
+  const [temp, hum, soil, ec, pump, mode] = parts.map(Number);
   if ([temp, hum, soil, ec, pump, mode].some((v) => Number.isNaN(v))) return;
 
   ui.tempVal.textContent = temp;
   ui.humVal.textContent = hum;
   ui.ecVal.textContent = ec;
   ui.soilVal.textContent = soil;
-
-  if (!Number.isNaN(threshold) && document.activeElement !== ui.thresholdInput) {
-    ui.thresholdInput.value = threshold;
-  }
 
   isAutoMode = mode === 1; // protocolo: 0 = manual, 1 = automatico
   const pumpOn = pump === 1;
@@ -289,12 +292,6 @@ ui.pumpBtn.addEventListener('click', () => {
 ui.modeToggle.addEventListener('click', () => {
   if (!isConnected) return;
   sendCommand(isAutoMode ? 'aoff' : 'aon');
-});
-
-ui.thresholdSaveBtn.addEventListener('click', () => {
-  const value = Math.round(Number(ui.thresholdInput.value));
-  if (Number.isNaN(value) || value < 0 || value > 100) return;
-  sendCommand(`thr${value}`);
 });
 
 // ---------- Historial: vista, graficas, tabla, export ----------
