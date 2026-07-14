@@ -183,38 +183,23 @@ async function connect() {
       optionalServices: [UART_SERVICE],
     });
     device.addEventListener('gattserverdisconnected', onDisconnected);
-  } catch (err) {
-    console.error('Error eligiendo dispositivo:', err);
-    setConnectionUI('disconnected');
-    if (err && err.name !== 'NotFoundError') {
-      ui.connectionError.textContent = `No se pudo abrir el selector de dispositivos: ${err.message || err.name || 'error desconocido'}.`;
-      ui.connectionError.classList.remove('hidden');
-    }
-    return;
-  }
 
-  const MAX_ATTEMPTS = 4;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      // Siempre conecta desde cero: si un intento anterior murió a mitad
-      // de camino, el server viejo ya no sirve, hay que pedir uno nuevo.
-      const chars = await connectGattAndServices(device);
-      rxChar = chars.rx;
-      txChar = chars.tx;
-      txChar.addEventListener('characteristicvaluechanged', onData);
-      setConnectionUI('connected');
-      return;
-    } catch (err) {
-      console.error(`Error de conexion (intento ${attempt}/${MAX_ATTEMPTS}):`, err);
-      if (device && device.gatt && device.gatt.connected) {
-        device.gatt.disconnect();
-      }
-      if (attempt < MAX_ATTEMPTS) {
-        await new Promise((resolve) => setTimeout(resolve, 700 * attempt));
-        continue;
-      }
-      setConnectionUI('disconnected');
-      ui.connectionError.textContent = `No se pudo conectar tras ${MAX_ATTEMPTS} intentos: ${err.message || err.name || 'error desconocido'}. El enlace Bluetooth se está cortando justo después de conectar. Probá acercar el teléfono a la microbit, cerrar cualquier otra app/pestaña que pueda estar conectada a ella (por ej. otra pestaña de esta misma app, o la app nRF Connect), y desconectar/reconectar la alimentación de la microbit (USB o batería) antes de reintentar.`;
+    const chars = await connectGattAndServices(device);
+    rxChar = chars.rx;
+    txChar = chars.tx;
+    txChar.addEventListener('characteristicvaluechanged', onData);
+
+    setConnectionUI('connected');
+  } catch (err) {
+    console.error('Error de conexion:', err);
+    if (device && device.gatt && device.gatt.connected) {
+      device.gatt.disconnect();
+    }
+    setConnectionUI('disconnected');
+    // "NotFoundError" pasa cuando el usuario cierra el selector de dispositivos sin elegir uno;
+    // en ese caso no mostramos error, fue una cancelación normal.
+    if (err && err.name !== 'NotFoundError') {
+      ui.connectionError.textContent = `No se pudo conectar: ${err.message || err.name || 'error desconocido'}.`;
       ui.connectionError.classList.remove('hidden');
     }
   }
