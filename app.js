@@ -162,11 +162,6 @@ ui.connectCard.addEventListener('blur', showConnectedLabel);
 
 async function connectGattAndServices(bleDevice) {
   const server = await bleDevice.gatt.connect();
-  // Pequena espera: en Android, pedir los servicios inmediatamente despues
-  // de conectar a veces falla con "GATT Error: Not supported" porque el
-  // stack de Bluetooth del sistema todavia no termino de resolver la
-  // conexion. Un respiro corto reduce mucho ese error.
-  await new Promise((resolve) => setTimeout(resolve, 350));
   const service = await server.getPrimaryService(UART_SERVICE);
   const rx = await service.getCharacteristic(UART_RX_CHAR);
   const tx = await service.getCharacteristic(UART_TX_CHAR);
@@ -198,9 +193,11 @@ async function connect() {
     return;
   }
 
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 4;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
+      // Siempre conecta desde cero: si un intento anterior murió a mitad
+      // de camino, el server viejo ya no sirve, hay que pedir uno nuevo.
       const chars = await connectGattAndServices(device);
       rxChar = chars.rx;
       txChar = chars.tx;
@@ -209,16 +206,15 @@ async function connect() {
       return;
     } catch (err) {
       console.error(`Error de conexion (intento ${attempt}/${MAX_ATTEMPTS}):`, err);
-      // Reiniciar la conexion GATT antes de reintentar, para no quedar en un estado a medias
       if (device && device.gatt && device.gatt.connected) {
         device.gatt.disconnect();
       }
       if (attempt < MAX_ATTEMPTS) {
-        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 700 * attempt));
         continue;
       }
       setConnectionUI('disconnected');
-      ui.connectionError.textContent = `No se pudo conectar tras ${MAX_ATTEMPTS} intentos: ${err.message || err.name || 'error desconocido'}. Probá reiniciar el Bluetooth del teléfono (o el teléfono entero) y volvé a intentar; si sigue, revisá que la microbit tenga el programa BLE UART cargado.`;
+      ui.connectionError.textContent = `No se pudo conectar tras ${MAX_ATTEMPTS} intentos: ${err.message || err.name || 'error desconocido'}. El enlace Bluetooth se está cortando justo después de conectar. Probá acercar el teléfono a la microbit, cerrar cualquier otra app/pestaña que pueda estar conectada a ella (por ej. otra pestaña de esta misma app, o la app nRF Connect), y desconectar/reconectar la alimentación de la microbit (USB o batería) antes de reintentar.`;
       ui.connectionError.classList.remove('hidden');
     }
   }
