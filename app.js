@@ -160,35 +160,65 @@ ui.connectCard.addEventListener('mouseleave', showConnectedLabel);
 ui.connectCard.addEventListener('focus', showDisconnectHint);
 ui.connectCard.addEventListener('blur', showConnectedLabel);
 
+async function connectGattAndServices(bleDevice) {
+  const server = await bleDevice.gatt.connect();
+  // Pequena espera: en Android, pedir los servicios inmediatamente despues
+  // de conectar a veces falla con "GATT Error: Not supported" porque el
+  // stack de Bluetooth del sistema todavia no termino de resolver la
+  // conexion. Un respiro corto reduce mucho ese error.
+  await new Promise((resolve) => setTimeout(resolve, 350));
+  const service = await server.getPrimaryService(UART_SERVICE);
+  const rx = await service.getCharacteristic(UART_RX_CHAR);
+  const tx = await service.getCharacteristic(UART_TX_CHAR);
+  await tx.startNotifications();
+  return { rx, tx };
+}
+
 async function connect() {
   if (!navigator.bluetooth) {
     ui.unsupportedMsg.classList.remove('hidden');
     return;
   }
+
+  setConnectionUI('connecting');
+
   try {
-    setConnectionUI('connecting');
     device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: 'BBC micro:bit' }],
       optionalServices: [UART_SERVICE],
     });
     device.addEventListener('gattserverdisconnected', onDisconnected);
-
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(UART_SERVICE);
-    rxChar = await service.getCharacteristic(UART_RX_CHAR);
-    txChar = await service.getCharacteristic(UART_TX_CHAR);
-
-    await txChar.startNotifications();
-    txChar.addEventListener('characteristicvaluechanged', onData);
-
-    setConnectionUI('connected');
   } catch (err) {
-    console.error('Error de conexion:', err);
+    console.error('Error eligiendo dispositivo:', err);
     setConnectionUI('disconnected');
-    // "NotFoundError" pasa cuando el usuario cierra el selector de dispositivos sin elegir uno;
-    // en ese caso no mostramos error, fue una cancelación normal.
     if (err && err.name !== 'NotFoundError') {
-      ui.connectionError.textContent = `No se pudo conectar: ${err.message || err.name || 'error desconocido'}. Revisá que el Bluetooth esté activo y que la microbit tenga el programa BLE UART cargado, y volvé a intentar.`;
+      ui.connectionError.textContent = `No se pudo abrir el selector de dispositivos: ${err.message || err.name || 'error desconocido'}.`;
+      ui.connectionError.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const MAX_ATTEMPTS = 3;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const chars = await connectGattAndServices(device);
+      rxChar = chars.rx;
+      txChar = chars.tx;
+      txChar.addEventListener('characteristicvaluechanged', onData);
+      setConnectionUI('connected');
+      return;
+    } catch (err) {
+      console.error(`Error de conexion (intento ${attempt}/${MAX_ATTEMPTS}):`, err);
+      // Reiniciar la conexion GATT antes de reintentar, para no quedar en un estado a medias
+      if (device && device.gatt && device.gatt.connected) {
+        device.gatt.disconnect();
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        continue;
+      }
+      setConnectionUI('disconnected');
+      ui.connectionError.textContent = `No se pudo conectar tras ${MAX_ATTEMPTS} intentos: ${err.message || err.name || 'error desconocido'}. Probá reiniciar el Bluetooth del teléfono (o el teléfono entero) y volvé a intentar; si sigue, revisá que la microbit tenga el programa BLE UART cargado.`;
       ui.connectionError.classList.remove('hidden');
     }
   }
