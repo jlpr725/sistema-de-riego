@@ -1,7 +1,7 @@
 // Nordic UART Service - mismo servicio que expone el bloque "Bluetooth" de MakeCode
 const UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const UART_RX_CHAR = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // la app escribe aca (RX de la microbit)
-const UART_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // la app escucha aca (TX de la microbit)
+const UART_RX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // la app escribe aca (RX de la microbit)
+const UART_TX_CHAR = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // la app escucha aca (TX de la microbit)
 
 const HISTORY_KEY = 'riego_history_v1';
 const HISTORY_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 horas
